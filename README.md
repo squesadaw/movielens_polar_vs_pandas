@@ -1,28 +1,14 @@
-# TTCT0017 - Computación Paralela y Distribuida
-# Tarea 3: Polars vs Pandas para Análisis y Predicción de Preferencias de Películas
+# MovieLens: Polars vs Pandas para Análisis y Predicción de Preferencias de Películas
 
-## Descripción
-
-El objetivo principal de este proyecto es construir un pipeline completo de análisis de datos y aprendizaje automático utilizando la biblioteca Polars, y compararlo sistemáticamente con una implementación equivalente en Pandas.
-
-Se utiliza el dataset MovieLens, un conjunto de datos ampliamente utilizado en sistemas de recomendación que contiene información sobre calificaciones de películas realizadas por usuarios.
-
-El proyecto incluye:
-
-* Análisis exploratorio de datos (EDA).
-* Ingeniería de características.
-* Entrenamiento de modelos de Machine Learning.
-* Comparación de rendimiento entre Polars y Pandas.
-* Experimentos de escalabilidad.
-* Evaluación de Lazy Execution en Polars.
+Proyecto desarrollado para la **Tarea 3** del curso **Computación Paralela y Distribuida**.
 
 ---
 
-## Objetivo del Problema
+# Descripción del Problema
 
-Se plantea un problema de clasificación binaria.
+El objetivo de este proyecto es construir un pipeline completo de análisis de datos y aprendizaje automático utilizando **Polars**, comparándolo posteriormente con una implementación equivalente en **Pandas** para evaluar el rendimiento de ambas bibliotecas en tareas comunes de procesamiento de datos.
 
-Dado un usuario y una película, se busca predecir si la película recibirá una valoración positiva.
+Como caso de estudio se utiliza el dataset **MovieLens Latest Small**, con el fin de predecir si un usuario otorgará una valoración positiva a una película.
 
 La variable objetivo se define como:
 
@@ -32,37 +18,47 @@ liked_movie = (rating >= 4.0)
 
 donde:
 
-* 1: la película recibió una valoración positiva.
-* 0: la película no recibió una valoración positiva.
+* **1:** la película recibió una valoración positiva.
+* **0:** la película no recibió una valoración positiva.
+
+El proyecto incluye:
+
+* Análisis Exploratorio de Datos (EDA).
+* Ingeniería de Características.
+* Entrenamiento de modelos de Machine Learning.
+* Comparación de rendimiento entre Polars y Pandas.
+* Experimentos de escalabilidad.
+* Comparación entre ejecución *eager* y *lazy* en Polars.
 
 ---
 
-## Dataset
+# Dataset
 
-### MovieLens Latest Small
-
-El dataset contiene información sobre:
-
-* Usuarios.
-* Películas.
-* Calificaciones.
-* Géneros cinematográficos.
+Se utiliza el conjunto de datos **MovieLens Latest Small**, ampliamente utilizado en investigación sobre sistemas de recomendación.
 
 Archivos utilizados:
 
-* ratings.csv
-* movies.csv
+* `ratings.csv`
+* `movies.csv`
 
 Características principales:
 
-* Más de 100,000 registros.
-* Datos relacionales adecuados para operaciones JOIN.
-* Variables categóricas y numéricas.
-* Problema adecuado para análisis exploratorio y aprendizaje automático.
+* Más de 100 000 registros.
+* Variables numéricas y categóricas.
+* Estructura relacional que permite realizar operaciones `JOIN`.
+* Adecuado para tareas de clasificación y análisis exploratorio.
 
 ---
 
-## Tecnologías Utilizadas
+# Fuente del Dataset
+
+MovieLens Dataset
+
+https://grouplens.org/datasets/movielens/
+
+---
+
+# Tecnologías Utilizadas
 
 * Python 3.11+
 * Polars
@@ -72,10 +68,73 @@ Características principales:
 * Matplotlib
 * Seaborn
 * Psutil
+* Jupyter Notebook
 
 ---
 
-## Estructura del Proyecto
+# Instalación
+
+Clonar el repositorio:
+
+```bash
+git clone <repository-url>
+cd <repository-folder>
+```
+
+Crear un entorno virtual (opcional pero recomendado):
+
+### Linux / macOS
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+```
+
+### Windows
+
+```bash
+python -m venv .venv
+.venv\Scripts\activate
+```
+
+Instalar las dependencias:
+
+```bash
+pip install -r requirements.txt
+```
+
+---
+
+# Ejecución
+
+1. Descargar el dataset MovieLens.
+2. Copiar `ratings.csv` y `movies.csv` dentro de:
+
+```text
+data/raw/
+```
+
+3. Abrir el notebook:
+
+```text
+notebooks/analysis.ipynb
+```
+
+4. Ejecutar las celdas en orden.
+
+El notebook realiza automáticamente:
+
+* Análisis Exploratorio de Datos.
+* Ejecución del pipeline con Polars.
+* Entrenamiento y evaluación de modelos.
+* Ejecución del pipeline equivalente con Pandas.
+* Benchmark entre ambas implementaciones.
+* Experimentos de escalabilidad.
+* Comparación entre ejecución *eager* y *lazy*.
+
+---
+
+# Estructura del Proyecto
 
 ```text
 project/
@@ -97,6 +156,10 @@ src/
 └── train_models.py
 
 results/
+├── benchmark_results.csv
+├── model_results.csv
+├── scalability_results.csv
+└── lazy_execution_results.csv
 
 figures/
 
@@ -108,146 +171,100 @@ requirements.txt
 
 ---
 
-## Pipeline del Proyecto
+# Arquitectura del Proyecto
 
-### 1. Análisis Exploratorio de Datos
+El proyecto está organizado de forma modular para separar claramente las responsabilidades de cada componente.
 
-Utilizando exclusivamente Polars:
+## `analysis.ipynb`
 
-* Estadísticas descriptivas.
-* Identificación de valores faltantes.
-* Distribuciones de variables.
-* Correlaciones relevantes.
-* Visualizaciones.
+Notebook principal que presenta el flujo completo del proyecto:
 
-### 2. Ingeniería de Características
+* Análisis Exploratorio de Datos (EDA).
+* Ejecución del pipeline en Polars.
+* Entrenamiento y evaluación de modelos.
+* Ejecución del pipeline equivalente en Pandas.
+* Benchmark entre Polars y Pandas.
+* Experimentos de escalabilidad.
+* Comparación entre ejecución *eager* y *lazy*.
 
-El pipeline incluye:
+## `preprocessing.py`
 
-* JOIN entre ratings y movies.
-* Transformación de géneros.
-* Extracción de variables temporales.
-* Agregaciones por usuario.
-* Agregaciones por película.
-* Creación de nuevas características.
-* Construcción de la variable objetivo.
+Responsable de:
 
-### 3. Machine Learning
+* Carga de los datasets.
+* Validación de la estructura de los datos.
+* Funciones auxiliares para obtener información del dataset.
 
-Modelos entrenados:
+## `polars_pipeline.py`
 
-* Logistic Regression
-* Random Forest
-* Gradient Boosting
+Implementa el pipeline completo utilizando Polars:
 
-Métricas reportadas:
+* Lectura de datos.
+* JOIN entre tablas.
+* Filtrado de registros.
+* Transformaciones.
+* Ingeniería de características.
+* Medición de tiempos de ejecución.
 
-* Accuracy
-* F1 Score
-* ROC AUC
-* Matriz de Confusión
-* Tiempo de entrenamiento
+## `pandas_pipeline.py`
 
-### 4. Benchmark Polars vs Pandas
+Implementa exactamente el mismo pipeline utilizando Pandas para permitir una comparación justa de rendimiento.
 
-Se comparan:
+## `feature_engineering.py`
 
-* Tiempo de lectura.
-* Tiempo de JOIN.
-* Tiempo de agregación.
-* Tiempo de transformación.
-* Tiempo de feature engineering.
-* Tiempo total del pipeline.
+Contiene funciones auxiliares y constantes compartidas relacionadas con la ingeniería de características.
 
-### 5. Escalabilidad
+## `train_models.py`
 
-Experimentos utilizando:
+Entrena y evalúa los modelos de Machine Learning utilizando Scikit-Learn.
 
-* 25% del dataset.
-* 50% del dataset.
-* 75% del dataset.
-* 100% del dataset.
-
-Para cada caso se reporta:
-
-* Tiempo en Pandas.
-* Tiempo en Polars.
-* Speedup observado.
-
-### 6. Lazy Execution
-
-Comparación entre:
-
-```python
-pl.read_csv(...)
-```
-
-y
-
-```python
-pl.scan_csv(...).collect()
-```
-
-analizando:
-
-* Tiempo de ejecución.
-* Uso de memoria.
-* Complejidad del pipeline.
+Este módulo acepta tanto DataFrames de Polars como de Pandas. Cuando recibe un DataFrame de Polars, realiza internamente la conversión necesaria para reutilizar exactamente el mismo proceso de entrenamiento para ambos pipelines.
 
 ---
 
-## Instalación
-
-Clonar el repositorio:
-
-```bash
-git clone <repository-url>
-cd project
-```
-
-Crear entorno virtual:
-
-```bash
-python -m venv .venv
-source .venv/bin/activate
-```
-
-Instalar dependencias:
-
-```bash
-pip install -r requirements.txt
-```
-
----
-
-## Ejecución
-
-Abrir:
+# Flujo del Proyecto
 
 ```text
-notebooks/analysis.ipynb
+ratings.csv          movies.csv
+      │                   │
+      └───────── JOIN ────┘
+                  │
+                  ▼
+        Análisis Exploratorio (Polars)
+                  │
+                  ▼
+      Pipeline Polars (Feature Engineering)
+                  │
+                  ▼
+          DataFrame procesado
+                  │
+                  ▼
+     Entrenamiento de modelos (Scikit-Learn)
+                  │
+                  ▼
+          Resultados de Machine Learning
+                  │
+                  ▼
+      Pipeline equivalente en Pandas
+                  │
+                  ▼
+        Benchmark Polars vs Pandas
+                  │
+                  ▼
+      Escalabilidad y Lazy Execution
 ```
-
-y ejecutar las celdas en orden.
-
-El notebook genera automáticamente:
-
-* Resultados de Machine Learning.
-* Gráficas.
-* Benchmarks.
-* Resultados de escalabilidad.
-* Resultados de Lazy Execution.
 
 ---
 
-## Resultados
+# Resultados
 
 Esta sección será completada una vez finalizados los experimentos.
 
 Se incluirán:
 
-* Resultados predictivos.
-* Comparación Polars vs Pandas.
-* Gráficas de speedup.
-* Discusión técnica de resultados.
-* Conclusiones.
+* Resultados de los modelos de Machine Learning.
+* Comparación de tiempos entre Polars y Pandas.
+* Speedup observado.
+* Resultados de escalabilidad.
+* Comparación entre ejecución *eager* y *lazy*.
+* Conclusiones finales del estudio.

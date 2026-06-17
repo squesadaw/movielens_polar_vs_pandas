@@ -1,0 +1,13 @@
+polars
+pandas
+numpy
+
+matplotlib
+seaborn
+
+scikit-learn
+
+psutil
+
+jupyter
+ipykernel
