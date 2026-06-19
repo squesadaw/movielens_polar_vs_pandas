@@ -9,6 +9,7 @@ import numpy as np
 import polars as pl
 
 from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
 
 from src.preprocessing import (
     load_ratings_polars,
@@ -24,7 +25,8 @@ from src.feature_engineering import (
     compute_movie_features,
     apply_user_features,
     apply_movie_features,
-    encode_genres,
+    compute_genre_columns,
+    apply_genre_encoding,
     prepare_dataset,
 )
 
@@ -44,9 +46,16 @@ def run_polars_pipeline(
 
     Returns
     -------
-    train_df
-    test_df
-    timings
+    tuple
+        (
+            train_df,
+            test_df,
+            X_train,
+            X_test,
+            y_train,
+            y_test,
+            timings,
+        )
     """
 
     timings = {}
@@ -133,8 +142,17 @@ def run_polars_pipeline(
     train_df = apply_movie_features(train_df, movie_features)
     test_df = apply_movie_features(test_df, movie_features)
 
-    train_df = encode_genres(train_df)
-    test_df = encode_genres(test_df)
+    genre_columns = compute_genre_columns(train_df)
+
+    train_df = apply_genre_encoding(
+        train_df,
+        genre_columns,
+    )
+
+    test_df = apply_genre_encoding(
+        test_df,
+        genre_columns,
+    )
 
     train_df = prepare_dataset(train_df)
     test_df = prepare_dataset(test_df)
@@ -144,7 +162,26 @@ def run_polars_pipeline(
     )
 
     # ========================================================================
-    # Total
+    # Prepare Data for Machine Learning
+    # ========================================================================
+
+    X_train = train_df.drop("liked_movie").to_numpy()
+    y_train = train_df["liked_movie"].to_numpy()
+
+    X_test = test_df.drop("liked_movie").to_numpy()
+    y_test = test_df["liked_movie"].to_numpy()
+
+    # ========================================================================
+    # Feature Scaling
+    # ========================================================================
+
+    scaler = StandardScaler()
+
+    X_train = scaler.fit_transform(X_train)
+    X_test = scaler.transform(X_test)
+
+    # ========================================================================
+    # Total Time
     # ========================================================================
 
     timings["total"] = sum(timings.values())
@@ -152,5 +189,9 @@ def run_polars_pipeline(
     return (
         train_df,
         test_df,
+        X_train,
+        X_test,
+        y_train,
+        y_test,
         timings,
     )

@@ -17,15 +17,6 @@ def merge_datasets(
 ) -> pl.DataFrame:
     """
     Merge ratings and movies datasets.
-
-    Parameters
-    ----------
-    ratings : pl.DataFrame
-    movies : pl.DataFrame
-
-    Returns
-    -------
-    pl.DataFrame
     """
 
     return ratings.join(
@@ -39,11 +30,11 @@ def merge_datasets(
 # Data Cleaning
 # ============================================================================
 
-def filter_records(df: pl.DataFrame) -> pl.DataFrame:
+def filter_records(
+    df: pl.DataFrame,
+) -> pl.DataFrame:
     """
     Filter invalid records.
-
-    For MovieLens this keeps ratings within the valid range.
     """
 
     return df.filter(
@@ -51,7 +42,9 @@ def filter_records(df: pl.DataFrame) -> pl.DataFrame:
     )
 
 
-def handle_missing_values(df: pl.DataFrame) -> pl.DataFrame:
+def handle_missing_values(
+    df: pl.DataFrame,
+) -> pl.DataFrame:
     """
     Remove missing values.
     """
@@ -63,7 +56,9 @@ def handle_missing_values(df: pl.DataFrame) -> pl.DataFrame:
 # Target Variable
 # ============================================================================
 
-def create_target_variable(df: pl.DataFrame) -> pl.DataFrame:
+def create_target_variable(
+    df: pl.DataFrame,
+) -> pl.DataFrame:
     """
     Create binary target variable.
 
@@ -83,7 +78,9 @@ def create_target_variable(df: pl.DataFrame) -> pl.DataFrame:
 # User Features
 # ============================================================================
 
-def compute_user_features(train_df: pl.DataFrame) -> pl.DataFrame:
+def compute_user_features(
+    train_df: pl.DataFrame,
+) -> pl.DataFrame:
     """
     Compute user statistics using ONLY the training set.
     """
@@ -117,8 +114,12 @@ def apply_user_features(
             how="left",
         )
         .with_columns([
-            pl.col("user_avg_rating").fill_null(0),
-            pl.col("user_num_ratings").fill_null(0),
+            pl.col("user_avg_rating")
+            .fill_null(0),
+
+            pl.col("user_num_ratings")
+            .fill_null(0)
+            .cast(pl.Int32),
         ])
     )
 
@@ -127,7 +128,9 @@ def apply_user_features(
 # Movie Features
 # ============================================================================
 
-def compute_movie_features(train_df: pl.DataFrame) -> pl.DataFrame:
+def compute_movie_features(
+    train_df: pl.DataFrame,
+) -> pl.DataFrame:
     """
     Compute movie statistics using ONLY the training set.
     """
@@ -161,8 +164,12 @@ def apply_movie_features(
             how="left",
         )
         .with_columns([
-            pl.col("movie_avg_rating").fill_null(0),
-            pl.col("movie_num_ratings").fill_null(0),
+            pl.col("movie_avg_rating")
+            .fill_null(0),
+
+            pl.col("movie_num_ratings")
+            .fill_null(0)
+            .cast(pl.Int32),
         ])
     )
 
@@ -171,21 +178,16 @@ def apply_movie_features(
 # Genre Features
 # ============================================================================
 
-# ============================================================================
-# Genre Features
-# ============================================================================
-
-def encode_genres(df: pl.DataFrame) -> pl.DataFrame:
+def compute_genre_columns(
+    train_df: pl.DataFrame,
+) -> list[str]:
     """
-    Automatically one-hot encode all movie genres.
-
-    The list of genres is extracted from the dataset, making the
-    function reusable for other movie datasets.
+    Determine the list of genres using ONLY the training set.
     """
 
-    # Get unique genres from the dataset
-    genres = (
-        df.select("genres")
+    return (
+        train_df
+        .select("genres")
         .to_series()
         .str.split("|")
         .explode()
@@ -195,17 +197,28 @@ def encode_genres(df: pl.DataFrame) -> pl.DataFrame:
         .to_list()
     )
 
-    # Create one-hot encoded columns
+
+def apply_genre_encoding(
+    df: pl.DataFrame,
+    genres: list[str],
+) -> pl.DataFrame:
+    """
+    Apply one-hot encoding using the genres learned from the training set.
+    """
+
     return df.with_columns([
         pl.col("genres")
-        .str.contains(rf"(^|\|){genre}(\||$)")
+        .str.contains(
+            rf"(^|\|){genre}(\||$)"
+        )
         .cast(pl.Int8)
         .alias(
             "genre_"
             + genre.lower()
-                     .replace("-", "_")
-                     .replace(" ", "_")
+                   .replace("-", "_")
+                   .replace(" ", "_")
         )
+
         for genre in genres
     ])
 
@@ -214,7 +227,9 @@ def encode_genres(df: pl.DataFrame) -> pl.DataFrame:
 # Dataset Preparation
 # ============================================================================
 
-def prepare_dataset(df: pl.DataFrame) -> pl.DataFrame:
+def prepare_dataset(
+    df: pl.DataFrame,
+) -> pl.DataFrame:
     """
     Remove columns not used for machine learning.
     """
@@ -223,4 +238,5 @@ def prepare_dataset(df: pl.DataFrame) -> pl.DataFrame:
         "title",
         "genres",
         "timestamp",
+        "rating"
     ])

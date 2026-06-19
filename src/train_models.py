@@ -6,8 +6,6 @@ Functions for training and evaluating machine learning models.
 
 import time
 
-import pandas as pd
-
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import (
     RandomForestClassifier,
@@ -94,6 +92,11 @@ def evaluate_model(
 ):
     """
     Evaluate a trained classification model.
+
+    Returns
+    -------
+    dict
+        Dictionary containing evaluation metrics.
     """
 
     predictions = model.predict(X_test)
@@ -132,6 +135,25 @@ def train_all_models(
 ):
     """
     Train and evaluate all classification models.
+
+    Parameters
+    ----------
+    X_train : numpy.ndarray
+        Training features.
+
+    X_test : numpy.ndarray
+        Testing features.
+
+    y_train : numpy.ndarray
+        Training labels.
+
+    y_test : numpy.ndarray
+        Testing labels.
+
+    Returns
+    -------
+    list
+        List containing the evaluation metrics for each model.
     """
 
     models = {
@@ -155,13 +177,15 @@ def train_all_models(
             y_test,
         )
 
-        results.append({
-            "model": model_name,
-            "accuracy": metrics["accuracy"],
-            "f1_score": metrics["f1_score"],
-            "auc": metrics["auc"],
-            "training_time": training_time,
-            "confusion_matrix": metrics["confusion_matrix"],
-        })
+        results.append(
+            {
+                "model": model_name,
+                "accuracy": metrics["accuracy"],
+                "f1_score": metrics["f1_score"],
+                "auc": metrics["auc"],
+                "training_time": training_time,
+                "confusion_matrix": metrics["confusion_matrix"],
+            }
+        )
 
-    return pd.DataFrame(results)
+    return results

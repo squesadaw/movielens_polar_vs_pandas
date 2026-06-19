@@ -30,7 +30,9 @@ def merge_datasets(
 # Data Cleaning
 # ============================================================================
 
-def filter_records(df: pd.DataFrame) -> pd.DataFrame:
+def filter_records(
+    df: pd.DataFrame,
+) -> pd.DataFrame:
     """
     Filter invalid records.
     """
@@ -40,7 +42,9 @@ def filter_records(df: pd.DataFrame) -> pd.DataFrame:
     ].copy()
 
 
-def handle_missing_values(df: pd.DataFrame) -> pd.DataFrame:
+def handle_missing_values(
+    df: pd.DataFrame,
+) -> pd.DataFrame:
     """
     Remove missing values.
     """
@@ -52,7 +56,9 @@ def handle_missing_values(df: pd.DataFrame) -> pd.DataFrame:
 # Target Variable
 # ============================================================================
 
-def create_target_variable(df: pd.DataFrame) -> pd.DataFrame:
+def create_target_variable(
+    df: pd.DataFrame,
+) -> pd.DataFrame:
     """
     Create binary target variable.
 
@@ -112,6 +118,7 @@ def apply_user_features(
     df["user_num_ratings"] = (
         df["user_num_ratings"]
         .fillna(0)
+        .astype("int32")
     )
 
     return df
@@ -161,6 +168,7 @@ def apply_movie_features(
     df["movie_num_ratings"] = (
         df["movie_num_ratings"]
         .fillna(0)
+        .astype("int32")
     )
 
     return df
@@ -170,20 +178,29 @@ def apply_movie_features(
 # Genre Features
 # ============================================================================
 
-def encode_genres(
+def compute_genre_columns(
+    train_df: pd.DataFrame,
+) -> list[str]:
+    """
+    Determine the list of genres using ONLY the training set.
+    """
+
+    return sorted({
+        genre
+        for values in train_df["genres"].dropna()
+        for genre in values.split("|")
+    })
+
+
+def apply_genre_encoding(
     df: pd.DataFrame,
+    genres: list[str],
 ) -> pd.DataFrame:
     """
-    Automatically one-hot encode all movie genres.
+    Apply one-hot encoding using the genres learned from the training set.
     """
 
     df = df.copy()
-
-    genres = sorted({
-        genre
-        for values in df["genres"].dropna()
-        for genre in values.split("|")
-    })
 
     for genre in genres:
 
@@ -222,5 +239,6 @@ def prepare_dataset(
             "title",
             "genres",
             "timestamp",
+            "rating"
         ]
     )
