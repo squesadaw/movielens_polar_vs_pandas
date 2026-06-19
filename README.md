@@ -164,7 +164,7 @@ src/
 figures/
 
 report/
-└── report.pdf
+└── informe.pdf
 
 README.md
 requirements.txt
